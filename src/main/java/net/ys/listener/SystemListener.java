@@ -1,9 +1,9 @@
 package net.ys.listener;
 
+import net.ys.component.SysConfig;
 import net.ys.service.EtlService;
 import net.ys.threadpool.ThreadPoolManager;
-import net.ys.utils.ApplicationContextUtil;
-import net.ys.utils.PropertyUtil;
+import net.ys.component.ApplicationContextUtil;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -25,13 +25,11 @@ public class SystemListener implements ServletContextListener {
         /**
          * 启动所有已开启的etl进行传输
          */
-        final String kjbPath = PropertyUtil.get("etl_ktr_path");
-
         Runnable r = new Runnable() {
             @Override
             public void run() {
                 EtlService etlService = ApplicationContextUtil.getBean("etlService", EtlService.class);
-                etlService.restartEtlJob(kjbPath);
+                etlService.restartEtlJob(SysConfig.etlKtrPath);
             }
         };
         ThreadPoolManager.INSTANCE.complexPool.doIt(r);

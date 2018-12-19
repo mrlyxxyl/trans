@@ -3,12 +3,16 @@ package net.ys.service;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.ys.bean.*;
+import net.ys.component.SysConfig;
 import net.ys.constant.DbType;
 import net.ys.constant.X;
 import net.ys.dao.DbDao;
 import net.ys.dao.EtlDao;
 import net.ys.threadpool.ThreadPoolManager;
-import net.ys.utils.*;
+import net.ys.utils.DBUtil;
+import net.ys.utils.KettleUtil;
+import net.ys.utils.LogUtil;
+import net.ys.utils.TimeUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -31,7 +35,6 @@ public class EtlService {
 
     public static Map<String, TimerTask> jobs;
     public static Timer timer;
-    static String uploadApiUrl;
 
     //单次传输最大限制
     static final int PAGE_SIZE = 500;
@@ -40,7 +43,6 @@ public class EtlService {
     static {
         jobs = new ConcurrentHashMap<String, TimerTask>(100);
         timer = new Timer();
-        uploadApiUrl = PropertyUtil.get("upload_api_url");
     }
 
     public long queryEtlEntityCount(String prjId) {
@@ -628,7 +630,7 @@ public class EtlService {
                 String now = TimeUtil.genYmdHms();
                 String lastTransTime = etlDao.queryLastTransTime(entity);
                 String tableName = entity.getDesTabName();
-                URL url = new URL(uploadApiUrl + "/api/upload.do?table_name=" + tableName);
+                URL url = new URL(SysConfig.uploadApiUrl + "/api/upload.do?table_name=" + tableName);
                 Connection connection;
                 if (dbType == 0) {
                     connection = DBUtil.getConnectionMySql(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());

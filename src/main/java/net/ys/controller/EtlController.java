@@ -1,12 +1,12 @@
 package net.ys.controller;
 
 import net.ys.bean.*;
+import net.ys.component.SysConfig;
 import net.ys.constant.GenResult;
 import net.ys.constant.SysRegex;
 import net.ys.service.EtlService;
 import net.ys.utils.KettleUtil;
 import net.ys.utils.LogUtil;
-import net.ys.utils.PropertyUtil;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -29,19 +29,13 @@ public class EtlController {
     @Resource
     private EtlService etlService;
 
-    String ktrPath;
-
-    String kjbPath;
-
     @PostConstruct
     public void init() {
-        ktrPath = PropertyUtil.get("etl_ktr_path");
-        File file = new File(ktrPath);
+        File file = new File(SysConfig.etlKtrPath);
         if (!file.exists()) {
             file.mkdirs();
         }
-        kjbPath = PropertyUtil.get("etl_kjb_path");
-        file = new File(kjbPath);
+        file = new File(SysConfig.etlKjbPath);
         if (!file.exists()) {
             file.mkdirs();
         }
@@ -561,15 +555,13 @@ public class EtlController {
 
             EtlProject project = etlService.queryEtlKtrProject(entityId);
 
-            String ktrPath = request.getServletContext().getRealPath("/ktr") + "/";
-            String kjbPath = request.getServletContext().getRealPath("/kjb") + "/";
             String etlId = entity.getEtlId();
-            boolean flag = KettleUtil.genKtrFile(entity, project, fields, ktrPath, etlId);//生成ktr转换文件
+            boolean flag = KettleUtil.genKtrFile(entity, project, fields, SysConfig.etlKtrPath, etlId);//生成ktr转换文件
 
             if (flag) {
-                flag = KettleUtil.genKjbFile(etlId, ktrPath + etlId + ".ktr", kjbPath, entity);
+                flag = KettleUtil.genKjbFile(etlId, SysConfig.etlKtrPath + etlId + ".ktr", SysConfig.etlKjbPath, entity);
                 if (flag) {//执行job
-                    KettleUtil.startEtlJob(kjbPath + etlId + ".kjb", entityId);
+                    KettleUtil.startEtlJob(SysConfig.etlKjbPath + etlId + ".kjb", entityId);
                     flag = etlService.chgJobStatus(entityId, 1);
                 }
             }
