@@ -325,6 +325,57 @@ public class DBUtil {
         return null;
     }
 
+    public static List<DbField> getAllFieldsMySql(String ip, int port, String dbName, String userName, String pwd) {
+        Connection connection = null;
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            String url = "jdbc:mysql://" + ip + ":" + port + "/" + dbName;
+            connection = DriverManager.getConnection(url, userName, pwd);
+            statement = connection.prepareStatement("SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, COLUMN_COMMENT, IF (COLUMN_KEY = 'PRI', 1, 0) AS PRI_KEY FROM information_schema.`COLUMNS` WHERE TABLE_SCHEMA = ? ORDER BY TABLE_NAME");
+            statement.setString(1, dbName);
+            rs = statement.executeQuery();
+            List<DbField> fields = new ArrayList<DbField>();
+            String tableName;
+            String columnName;
+            String columnType;
+            String columnComment;
+            int priKey;
+            while (rs.next()) {
+                tableName = rs.getString("TABLE_NAME");
+                columnName = rs.getString("COLUMN_NAME");
+                columnType = rs.getString("DATA_TYPE");
+                columnComment = rs.getString("COLUMN_COMMENT");
+                priKey = rs.getInt("PRI_KEY");
+                if (StringUtils.isBlank(columnComment)) {
+                    columnComment = columnName;
+                }
+                fields.add(new DbField(tableName, columnName, columnType, columnComment, priKey));
+            }
+            rs.close();
+            statement.close();
+            connection.close();
+            return fields;
+        } catch (Exception e) {
+            LogUtil.error(e);
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (statement != null) {
+                    statement.close();
+                }
+                if (connection != null) {
+                    connection.close();
+                }
+            } catch (SQLException e) {
+            }
+        }
+        return null;
+    }
+
     public static List<DbField> getFieldsOracle(String ip, int port, String dbName, EtlAllTable table, String userName, String pwd) {
         Connection connection = null;
         PreparedStatement statement = null;

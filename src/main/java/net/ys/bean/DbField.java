@@ -10,6 +10,8 @@ public class DbField {
 
     private String fieldName;//字段名
 
+    private String fieldType;//数据类型
+
     private String comment;//注释
 
     private int priKey;//是否为主键
@@ -22,6 +24,14 @@ public class DbField {
     public DbField(String tableId, String fieldName, String comment, int priKey) {
         this.tableId = tableId;
         this.fieldName = fieldName;
+        this.comment = comment;
+        this.priKey = priKey;
+    }
+
+    public DbField(String tableId, String fieldName, String fieldType, String comment, int priKey) {
+        this.tableId = tableId;
+        this.fieldName = fieldName;
+        this.fieldType = fieldType;
         this.comment = comment;
         this.priKey = priKey;
     }
@@ -56,5 +66,13 @@ public class DbField {
 
     public void setPriKey(int priKey) {
         this.priKey = priKey;
+    }
+
+    public String getFieldType() {
+        return fieldType;
+    }
+
+    public void setFieldType(String fieldType) {
+        this.fieldType = fieldType;
     }
 }
