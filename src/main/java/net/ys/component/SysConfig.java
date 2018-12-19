@@ -19,16 +19,16 @@ public class SysConfig {
 
     @Value("${upload.api.url}")
     public void setUploadApiUrl(String uploadApiUrl) {
-        SysConfig.uploadApiUrl = uploadApiUrl;
+        this.uploadApiUrl = uploadApiUrl;
     }
 
     @Value("${etl.ktr.path}")
-    public static void setEtlKtrPath(String etlKtrPath) {
-        SysConfig.etlKtrPath = etlKtrPath;
+    public void setEtlKtrPath(String etlKtrPath) {
+        this.etlKtrPath = etlKtrPath;
     }
 
     @Value("${etl.kjb.path}")
-    public static void setEtlKjbPath(String etlKjbPath) {
-        SysConfig.etlKjbPath = etlKjbPath;
+    public void setEtlKjbPath(String etlKjbPath) {
+        this.etlKjbPath = etlKjbPath;
     }
 }
