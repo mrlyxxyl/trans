@@ -93,7 +93,7 @@
                             <span><a href="${baseUrl}/web/etl/dataSourceEdit.do?id=${dataSource.id}" target="rightFrame"><img src="${baseUrl}/img/bianji.png">编辑</a></span>
                             <span><a href="${baseUrl}/web/etl/etlAllTables.do?dsId=${dataSource.id}" target="rightFrame"><img src="${baseUrl}/img/chakan.png">数据表</a></span>
                             <span><a href="javascript:syncTableField('${dataSource.id}');" target="rightFrame"><img src="${baseUrl}/img/sync.png">同步结构</a></span>
-                            <span><a href="${baseUrl}/web/etl/doc.do?dsId=${dataSource.id}" target="rightFrame"><img src="${baseUrl}/img/chakan.png">文档</a></span>
+                            <span><a href="${baseUrl}/api/doc.do?dsId=${dataSource.id}" target="rightFrame"><img src="${baseUrl}/img/chakan.png">文档</a></span>
                         </td>
                     </tr>
                 </c:forEach>
