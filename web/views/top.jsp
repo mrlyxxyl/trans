@@ -31,7 +31,7 @@
 
 <body>
 <div class="top clearfloat">
-    <div class="logo fl"><a href="javascript:void(0)"><img src="${baseUrl}/img/logo.jpg"></a></div>
+    <div class="logo fl"><a href="javascript:void(0)">数据传输中心</a></div>
     <div class="fr time">
         <p>您好，<span>管理员</span>欢迎进入数据传输中心!</p>
 

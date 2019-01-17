@@ -9,11 +9,9 @@
     <link rel="stylesheet" type="text/css" href="${baseUrl}/css/basic.css">
     <link rel="stylesheet" type="text/css" href="${baseUrl}/css/index.css">
     <link rel="stylesheet" type="text/css" href="${baseUrl}/css/topAndBottom.css">
-    <script type="text/javascript" src="${baseUrl}/js/jquery.min.js"></script>
-    <script type="text/javascript" src="${baseUrl}/js/menu.js"></script>
 </head>
 
 <body>
-<div class="footr">Generated on Wed Jul 19 2017 19:42:02 for zhuLong</div>
+<div class="footr">Generated on Wed Jul 19 2017 19:42:02 for Mr Lee</div>
 </body>
 </html>
