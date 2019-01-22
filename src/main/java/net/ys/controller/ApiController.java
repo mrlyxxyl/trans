@@ -23,7 +23,6 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,8 +95,7 @@ public class ApiController {
             Map<String, Object> map = new HashMap<String, Object>();
             EtlDataSource dataSource = etlService.queryEtlDataSource(dsId);
             List<DbField> fields = DBUtil.getAllFieldsMySql(dataSource.getDbIp(), dataSource.getDbPort(), dataSource.getDbName(), dataSource.getDbUsername(), dataSource.getDbPwd());
-            List<Map<String, String>> list = new ArrayList<Map<String, String>>();
-            map.put("records", list);
+            map.put("records", fields);
             String templateFileName = request.getSession().getServletContext().getRealPath("/template/doc.xls");
             String resultFileName = "doc-" + System.currentTimeMillis() + ".xls";
             os = response.getOutputStream();
