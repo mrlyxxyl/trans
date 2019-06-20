@@ -130,7 +130,8 @@
                     <span class="title">原表名</span>
                     <select id="doc-ipt-srcTabName-1" name="srcTabName" onchange="changePk(this.value, 0);">
                         <c:forEach items="${srcTables}" var="srcTable">
-                            <option id="src_tab_${srcTable.name}" data_tab_id="${srcTable.id}" value="${srcTable.name}" <c:if test="${fn:toUpperCase(srcTable.name) == fn:toUpperCase(etlEntity.srcTabName)}">selected="selected"</c:if>>${srcTable.name}</option>
+                            <option id="src_tab_${srcTable.name}" data_tab_id="${srcTable.id}" value="${srcTable.name}"
+                                    <c:if test="${fn:toUpperCase(srcTable.name) == fn:toUpperCase(etlEntity.srcTabName)}">selected="selected"</c:if>>${srcTable.name}</option>
                         </c:forEach>
                     </select>
                 </div>
@@ -139,7 +140,8 @@
                     <span class="title">目标表名</span>
                     <select id="doc-ipt-desTabName-1" name="desTabName" onchange="changePk(this.value, 1);">
                         <c:forEach items="${desTables}" var="desTable">
-                            <option id="des_tab_${srcTable.name}" data_tab_id="${desTable.id}" value="${desTable.name}" <c:if test="${fn:toUpperCase(desTable.name) == fn:toUpperCase(etlEntity.desTabName)}">selected="selected"</c:if>>${desTable.name}</option>
+                            <option id="des_tab_${srcTable.name}" data_tab_id="${desTable.id}" value="${desTable.name}"
+                                    <c:if test="${fn:toUpperCase(desTable.name) == fn:toUpperCase(etlEntity.desTabName)}">selected="selected"</c:if>>${desTable.name}</option>
                         </c:forEach>
                     </select>
                 </div>
@@ -163,7 +165,7 @@
                 </div>
 
                 <div>
-                    <span class="title">是否重复</span>
+                    <span class="title">是否重复执行</span>
                     <select id="doc-ipt-repeat-1" name="repeat">
                         <option value="0" <c:if test="${etlEntity.repeat == 0}">selected="selected"</c:if>>否</option>
                         <option value="1" <c:if test="${etlEntity.repeat == 1}">selected="selected"</c:if>>是</option>
