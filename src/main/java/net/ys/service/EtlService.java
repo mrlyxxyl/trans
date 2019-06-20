@@ -3,7 +3,6 @@ package net.ys.service;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import net.ys.bean.*;
-import net.ys.component.SysConfig;
 import net.ys.constant.DbType;
 import net.ys.constant.X;
 import net.ys.dao.DbDao;
@@ -15,10 +14,6 @@ import net.ys.utils.TimeUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,7 +31,7 @@ public class EtlService {
     public static Timer timer;
 
     //单次传输最大限制
-    static final int PAGE_SIZE = 500;
+    static final int PAGE_SIZE = 50;
     static final String BOUNDARY = "----------HV2ymHFg03ehbqgZCaKO6jyH";
 
     static {
@@ -367,7 +362,7 @@ public class EtlService {
         try {
             Map<String, String> sql = genSql(project.getCenterDbType(), entity, fields);
 
-            TimerTask timerTask = new ApiTimerTask(project, entity, sql.get("sqlSelect"), sql.get("sqlCount"));
+            TimerTask timerTask = new ApiTimerTask(project, entity, sql.get("sqlSelect"), sql.get("sqlCount"), fields);
             int repeat = entity.getRepeat();
             if (repeat == 0) {//无需重复
                 timer.schedule(timerTask, 3000);
@@ -426,7 +421,7 @@ public class EtlService {
                 entity = queryEtlEntity(entityId);
                 project = queryEtlKtrProject(entityId);
                 sql = genSql(project.getCenterDbType(), entity, fields);
-                timerTask = new ApiTimerTask(project, entity, sql.get("sqlSelect"), sql.get("sqlCount"));
+                timerTask = new ApiTimerTask(project, entity, sql.get("sqlSelect"), sql.get("sqlCount"), fields);
                 int intervalMinute = entity.getIntervalMinute();
                 int intervalSecond = entity.getIntervalSecond();
                 long delay = X.TIME.MINUTE_MILLISECOND * intervalMinute + X.TIME.SECOND_MILLISECOND * intervalSecond;
@@ -494,54 +489,7 @@ public class EtlService {
 
         sql.put("sqlSelect", sqlSelect.toString());
         sql.put("sqlCount", sqlCount.toString());
-        LogUtil.debug(sqlCount, sqlSelect);
         return sql;
-    }
-
-    /**
-     * 定时同步待传输数据,分页传输
-     */
-    public boolean uploadDataStep(URL url, List<Map<String, Object>> dataList) {
-        HttpURLConnection connection = null;
-        try {
-            String data = JSONArray.fromObject(dataList).toString();
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setDoOutput(true);
-            connection.setDoInput(true);
-            connection.setUseCaches(false);
-            connection.setRequestMethod("POST");
-            connection.setRequestProperty("Connection", "Keep-Alive");
-            connection.setRequestProperty("Charset", X.ENCODING.U);
-            connection.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + BOUNDARY);
-            StringBuffer contentBody = new StringBuffer();
-            contentBody.append("--").append(BOUNDARY).append("\r\nContent-Disposition: form-data; name=\"data\"\r\n\r\n").append(data).append("\r\n--").append(BOUNDARY);
-            contentBody.append(BOUNDARY).append("--\r\n\r\n--").append(BOUNDARY).append("--\r\n");
-            OutputStream out = connection.getOutputStream();
-            out.write(contentBody.toString().getBytes(X.ENCODING.U));
-            out.flush();
-            out.close();
-            InputStream in = connection.getInputStream();
-            int statusCode = connection.getResponseCode();
-            if (statusCode == 200) {
-                byte[] bytes = new byte[in.available()];
-                in.read(bytes);
-                String resp = new String(bytes, 0, bytes.length);
-                JSONObject jsonObject = JSONObject.fromObject(resp);
-                int resultCode = jsonObject.optInt("code");
-                if (resultCode == 1000) {//上传成功
-                    return true;
-                } else {
-                    LogUtil.info("uploadDataStep-error-code-->" + jsonObject.optInt("code") + " msg:" + jsonObject.optString("msg"));
-                }
-            }
-        } catch (Exception e) {
-            LogUtil.error(e);
-        } finally {
-            if (connection != null) {
-                connection.disconnect();
-            }
-        }
-        return false;
     }
 
     public boolean insertOrUpdateDate(String tableName, String data) {
@@ -604,33 +552,45 @@ public class EtlService {
         private EtlEntity entity;
         private String sqlSelect;
         private String sqlCount;
+        private List<EtlField> fields;
 
-        ApiTimerTask(EtlProject project, EtlEntity entity, String sqlSelect, String sqlCount) {
+        ApiTimerTask(EtlProject project, EtlEntity entity, String sqlSelect, String sqlCount, List<EtlField> fields) {
             this.project = project;
             this.entity = entity;
             this.sqlSelect = sqlSelect;
             this.sqlCount = sqlCount;
+            this.fields = fields;
         }
 
         @Override
         public void run() {
+            Connection connectionSrc = null;
+            Connection connectionDes = null;
             try {
-                int dbType = project.getCenterDbType();
+                int srcDbType = project.getCenterDbType();
+                int desDbType = project.getBusDbType();
                 String now = TimeUtil.genYmdHms();
                 String lastTransTime = etlDao.queryLastTransTime(entity);
-                String tableName = entity.getDesTabName();
-                URL url = new URL(SysConfig.uploadApiUrl + "/api/upload.do?table_name=" + tableName);
-                Connection connection;
-                if (dbType == 0) {
-                    connection = DBUtil.getConnectionMySql(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());
-                } else if (dbType == 1) {
-                    connection = DBUtil.getConnectionOracle(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());
+                String desTableName = entity.getDesTabName();
+
+                if (srcDbType == 0) {
+                    connectionSrc = DBUtil.getConnectionMySql(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());
+                } else if (srcDbType == 1) {
+                    connectionSrc = DBUtil.getConnectionOracle(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());
                 } else {
-                    connection = DBUtil.getConnectionMSSQL(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());
+                    connectionSrc = DBUtil.getConnectionMSSQL(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());
                 }
 
-                long dataCount = DBUtil.getDataCount(connection, sqlCount, lastTransTime, now);
-                LogUtil.debug("tableName:::" + tableName + "\t\tlastTransTime:::" + lastTransTime + "\t\tdataCount:::" + dataCount + "\t\tuploadData-start");
+                if (desDbType == 0) {
+                    connectionDes = DBUtil.getConnectionMySql(project.getBusDbIp(), Integer.parseInt(project.getBusDbPort()), project.getBusDbName(), project.getBusDbUsername(), project.getBusDbPwd());
+                } else if (desDbType == 1) {
+                    connectionDes = DBUtil.getConnectionOracle(project.getBusDbIp(), Integer.parseInt(project.getBusDbPort()), project.getBusDbName(), project.getBusDbUsername(), project.getBusDbPwd());
+                } else {
+                    connectionDes = DBUtil.getConnectionMSSQL(project.getBusDbIp(), Integer.parseInt(project.getBusDbPort()), project.getBusDbName(), project.getBusDbUsername(), project.getBusDbPwd());
+                }
+
+                long dataCount = DBUtil.getDataCount(connectionSrc, sqlCount, lastTransTime, now);
+                LogUtil.debug("tableName:::" + desTableName + "\t\tlastTransTime:::" + lastTransTime + "\t\tdataCount:::" + dataCount + "\t\tuploadData-start");
                 if (dataCount > 0) {
                     long page = dataCount / PAGE_SIZE + (dataCount % PAGE_SIZE == 0 ? 0 : 1);
                     List<Map<String, Object>> data;
@@ -639,27 +599,74 @@ public class EtlService {
                     int endPos;
                     for (int i = 1; i <= page; i++) {
                         startPos = (i - 1) * PAGE_SIZE;
-                        if (dbType == 0 || dbType == 2) {
+                        if (srcDbType == 0 || srcDbType == 2) {
                             endPos = PAGE_SIZE;
                         } else {//oracle特殊
                             endPos = i * PAGE_SIZE;
                         }
 
-                        data = DBUtil.getData(connection, sqlSelect, lastTransTime, now, startPos, endPos);
-                        flag = uploadDataStep(url, data);
+                        data = DBUtil.getData(connectionSrc, sqlSelect, lastTransTime, now, startPos, endPos);
+                        flag = addDataStep(connectionDes, desTableName, data, fields, desDbType);//直接插入到目标数据库中
                         if (!flag) {
                             return;
                         }
                     }
                 }
 
-                DBUtil.closeConnection(connection);
+                DBUtil.closeConnection(connectionDes);
                 etlDao.updateApiTransTime(entity, now);
 
-                LogUtil.debug("tableName:::" + tableName + "\t\tuploadData-end");
+                LogUtil.debug("tableName:::" + desTableName + "\t\tuploadData-end");
             } catch (Exception e) {
                 LogUtil.error(e);
+            } finally {
+                if (connectionSrc != null) {
+                    DBUtil.closeConnection(connectionSrc);
+                }
+                if (connectionDes != null) {
+                    DBUtil.closeConnection(connectionDes);
+                }
             }
         }
+    }
+
+    private boolean addDataStep(Connection connectionDes, String tableName, List<Map<String, Object>> data, List<EtlField> fields, int dbType) {
+
+        String quotLeft;
+        String quotRight;
+        if (dbType == 0) {
+            quotLeft = "`";
+            quotRight = "`";
+        } else if (dbType == 1) {
+            quotLeft = "\"";
+            quotRight = "\"";
+        } else {
+            quotLeft = "[";
+            quotRight = "]";
+        }
+
+        Map<String, Object> map = data.get(0);
+        Set<String> keys = map.keySet();
+        StringBuffer sql = new StringBuffer("INSERT INTO ").append(quotLeft).append(tableName).append(quotRight).append(" (");
+        boolean flag = false;
+
+        for (EtlField field : fields) {
+            if ("ORACLE___RW".equals(field.getDesFieldName())) {
+                flag = true;
+                continue;
+            }
+            sql.append(" ").append(quotLeft).append(field.getDesFieldName()).append(quotRight).append(",");
+        }
+
+        sql.deleteCharAt(sql.length() - 1);
+        int markSize;
+        if (flag) {
+            markSize = keys.size() - 1;
+        } else {
+            markSize = keys.size();
+        }
+        sql.append(") VALUES (").append(genMark(markSize)).append(")");
+        LogUtil.debug(sql);
+        return DBUtil.addDataStep(connectionDes, sql.toString(), data);
     }
 }

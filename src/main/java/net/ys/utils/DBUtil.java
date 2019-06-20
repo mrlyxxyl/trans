@@ -8,7 +8,7 @@ import org.apache.commons.lang.StringUtils;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -109,7 +109,7 @@ public class DBUtil {
             String columnType;
             Clob clob;
             while (rs.next()) {
-                map = new HashMap<String, Object>();
+                map = new LinkedHashMap<String, Object>();
                 metaData = rs.getMetaData();
                 columnCount = metaData.getColumnCount();
                 for (int i = 1; i <= columnCount; i++) {
@@ -538,6 +538,41 @@ public class DBUtil {
                 }
                 if (connection != null) {
                     connection.close();
+                }
+            } catch (SQLException e) {
+            }
+        }
+        return false;
+    }
+
+    public static boolean addDataStep(Connection connection, String sql, List<Map<String, Object>> data) {
+        PreparedStatement statement = null;
+        try {
+            connection.setAutoCommit(false);
+            statement = connection.prepareStatement(sql);
+            for (Map<String, Object> map : data) {
+                int i = 1;
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    if ("ORACLE___RW".equals(entry.getKey())) {
+                        continue;
+                    }
+                    statement.setObject(i++, entry.getValue());
+                }
+                statement.addBatch();
+            }
+
+            statement.executeBatch();
+            connection.commit();
+            connection.setAutoCommit(true);
+            statement.close();
+            return true;
+        } catch (Exception e) {
+            LogUtil.debug(e.getMessage());
+            LogUtil.error(e);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
                 }
             } catch (SQLException e) {
             }

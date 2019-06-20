@@ -15,8 +15,10 @@
        在远程应用中在进行ETL传输，这样实现字段不一致的情况，修改config.properties文件中的接口地址。如果只是为了传输数据，则不需要在配置ETL传输了
     3、使用API方式，数据源需要对传输的表添加系统时间戳字段，sql命令如下，只需替换表名：
         mysql:
-            添加字段：ALTER TABLE `person` ADD COLUMN `SYS__CREATE_OR_UPDATE_TIME` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP;
-            添加索引：ALTER TABLE `person` ADD INDEX `idx_person_scout` (`SYS__CREATE_OR_UPDATE_TIME`) USING BTREE ;
+            添加字段：
+                ALTER TABLE `person` ADD COLUMN `SYS__CREATE_OR_UPDATE_TIME` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP;
+            添加索引：
+                ALTER TABLE `person` ADD INDEX `idx_person_scout` (`SYS__CREATE_OR_UPDATE_TIME`) USING BTREE ;
 
         oracle:
             添加字段：ALTER TABLE "PERSON" ADD ( "SYS__CREATE_OR_UPDATE_TIME" TIMESTAMP(0)  DEFAULT sysdate NULL);

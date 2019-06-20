@@ -287,6 +287,7 @@ public class EtlDao {
 
     public boolean insertOrUpdateDate(String sql, final JSONArray jsonArray) {
         try {
+
             jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
                 @Override
                 public void setValues(PreparedStatement ps, int i) throws SQLException {
