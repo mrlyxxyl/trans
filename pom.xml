@@ -368,6 +368,12 @@
             <artifactId>poi-scratchpad</artifactId>
             <version>3.8-beta4</version>
         </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations-java5</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
         <!--excel-->
 
     </dependencies>

@@ -298,12 +298,7 @@ public class TimeUtil {
     }
 
     public static String unitFormat(int i) {
-        String retStr;
-        if (i >= 0 && i < 10)
-            retStr = "0" + Integer.toString(i);
-        else
-            retStr = "" + i;
-        return retStr;
+        return i >= 10 ? "" + i : "0" + i;
     }
 
     /**
