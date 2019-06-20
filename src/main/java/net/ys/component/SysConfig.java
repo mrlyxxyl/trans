@@ -13,16 +13,9 @@ import java.io.File;
 @Component
 public class SysConfig {
 
-    public static String uploadApiUrl;
-
     public static String etlKtrPath;
 
     public static String etlKjbPath;
-
-    @Value("${upload_api_url}")
-    public void setUploadApiUrl(String uploadApiUrl) {
-        this.uploadApiUrl = uploadApiUrl;
-    }
 
     @Value("${etl_ktr_path}")
     public void setEtlKtrPath(String etlKtrPath) {
