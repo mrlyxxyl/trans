@@ -1,12 +1,8 @@
 package net.ys.dao;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONNull;
-import net.sf.json.JSONObject;
 import net.ys.bean.*;
 import net.ys.constant.X;
 import net.ys.mapper.*;
-import net.ys.utils.LogUtil;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -16,7 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 @Repository
@@ -283,56 +278,6 @@ public class EtlDao {
     public void updateApiTransTime(EtlEntity entity, String now) {
         String sql = "UPDATE sys_etl_entity SET last_trans_time = ? WHERE id = ?";
         jdbcTemplate.update(sql, now, entity.getId());
-    }
-
-    public boolean insertOrUpdateDate(String sql, final JSONArray jsonArray) {
-        try {
-
-            jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-                @Override
-                public void setValues(PreparedStatement ps, int i) throws SQLException {
-                    JSONObject object = jsonArray.getJSONObject(i);
-                    Set<String> keys = object.keySet();
-                    Object o;
-                    int index = 1;
-                    for (String k : keys) {
-                        if ("ORACLE___RW".equals(k)) {
-                            continue;
-                        }
-                        o = object.opt(k);
-                        if (o instanceof JSONNull) {
-                            ps.setObject(index, null);
-                        } else {
-                            ps.setObject(index, o);
-                        }
-                        index++;
-                    }
-
-                    for (String k : keys) {
-                        if ("ORACLE___RW".equals(k)) {
-                            continue;
-                        }
-                        o = object.opt(k);
-                        if (o instanceof JSONNull) {
-                            ps.setObject(index, null);
-                        } else {
-                            ps.setObject(index, o);
-                        }
-                        index++;
-                    }
-                }
-
-                @Override
-                public int getBatchSize() {
-                    return jsonArray.size();
-                }
-            });
-
-            return true;
-        } catch (Exception e) {
-            LogUtil.error(e);
-        }
-        return false;
     }
 
     public String queryLastTransTime(EtlEntity entity) {

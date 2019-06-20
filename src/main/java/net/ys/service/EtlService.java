@@ -1,7 +1,5 @@
 package net.ys.service;
 
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
 import net.ys.bean.*;
 import net.ys.constant.DbType;
 import net.ys.constant.X;
@@ -490,46 +488,6 @@ public class EtlService {
         sql.put("sqlSelect", sqlSelect.toString());
         sql.put("sqlCount", sqlCount.toString());
         return sql;
-    }
-
-    public boolean insertOrUpdateDate(String tableName, String data) {
-        JSONArray jsonArray = JSONArray.fromObject(data);
-        if (jsonArray.size() == 0) {
-            return true;
-        }
-
-        JSONObject object = jsonArray.getJSONObject(0);
-        Set<String> keys = object.keySet();
-        StringBuffer sql = new StringBuffer("INSERT INTO `").append(tableName).append("` (");
-        boolean flag = false;
-        for (String key : keys) {
-            if ("ORACLE___RW".equals(key)) {
-                flag = true;
-                continue;
-            }
-            sql.append(" `").append(key).append("`,");
-        }
-        sql.deleteCharAt(sql.length() - 1);
-        int markSize;
-        if (flag) {
-            markSize = keys.size() - 1;
-        } else {
-            markSize = keys.size();
-        }
-        sql.append(") VALUES (").append(genMark(markSize)).append(") ON DUPLICATE KEY UPDATE ");
-
-        for (String key : keys) {
-            if ("ORACLE___RW".equals(key)) {
-                continue;
-            }
-            sql.append("`").append(key).append("` = ?,");
-        }
-
-        sql.deleteCharAt(sql.length() - 1);
-
-        LogUtil.debug(sql);
-
-        return etlDao.insertOrUpdateDate(sql.toString(), jsonArray);
     }
 
     /**
