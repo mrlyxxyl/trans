@@ -455,7 +455,7 @@ public class EtlService {
         String quotRight;
         StringBuffer sqlSelect;
         StringBuffer sqlCount;
-        if (dbType == 0) {
+        if (dbType == DbType.MY_SQL.type) {
             quotLeft = "`";
             quotRight = "`";
 
@@ -465,7 +465,7 @@ public class EtlService {
             }
             sqlSelect.append(" FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME BETWEEN ? AND ? ORDER BY SYS__CREATE_OR_UPDATE_TIME, ").append(quotLeft).append(entity.getSrcPrimaryKey()).append(quotRight).append(" LIMIT ?,?");
             sqlCount = new StringBuffer("SELECT COUNT(*) AS C FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME BETWEEN ? AND ?");
-        } else if (dbType == 1) {
+        } else if (dbType == DbType.ORACLE.type) {
             quotLeft = "\"";
             quotRight = "\"";
 
@@ -573,17 +573,17 @@ public class EtlService {
                 String lastTransTime = etlDao.queryLastTransTime(entity);
                 String desTableName = entity.getDesTabName();
 
-                if (srcDbType == 0) {
+                if (srcDbType == DbType.MY_SQL.type) {
                     connectionSrc = DBUtil.getConnectionMySql(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());
-                } else if (srcDbType == 1) {
+                } else if (srcDbType == DbType.ORACLE.type) {
                     connectionSrc = DBUtil.getConnectionOracle(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());
                 } else {
                     connectionSrc = DBUtil.getConnectionMSSQL(project.getCenterDbIp(), Integer.parseInt(project.getCenterDbPort()), project.getCenterDbName(), project.getCenterDbUsername(), project.getCenterDbPwd());
                 }
 
-                if (desDbType == 0) {
+                if (desDbType == DbType.MY_SQL.type) {
                     connectionDes = DBUtil.getConnectionMySql(project.getBusDbIp(), Integer.parseInt(project.getBusDbPort()), project.getBusDbName(), project.getBusDbUsername(), project.getBusDbPwd());
-                } else if (desDbType == 1) {
+                } else if (desDbType == DbType.ORACLE.type) {
                     connectionDes = DBUtil.getConnectionOracle(project.getBusDbIp(), Integer.parseInt(project.getBusDbPort()), project.getBusDbName(), project.getBusDbUsername(), project.getBusDbPwd());
                 } else {
                     connectionDes = DBUtil.getConnectionMSSQL(project.getBusDbIp(), Integer.parseInt(project.getBusDbPort()), project.getBusDbName(), project.getBusDbUsername(), project.getBusDbPwd());
@@ -634,10 +634,10 @@ public class EtlService {
 
         String quotLeft;
         String quotRight;
-        if (dbType == 0) {
+        if (dbType == DbType.MY_SQL.type) {
             quotLeft = "`";
             quotRight = "`";
-        } else if (dbType == 1) {
+        } else if (dbType == DbType.ORACLE.type) {
             quotLeft = "\"";
             quotRight = "\"";
         } else {
@@ -666,7 +666,33 @@ public class EtlService {
             markSize = keys.size();
         }
         sql.append(") VALUES (").append(genMark(markSize)).append(")");
-        LogUtil.debug(sql);
-        return DBUtil.addDataStep(connectionDes, sql.toString(), data);
+
+        String sqlStr;
+        if (dbType == DbType.MY_SQL.type) {
+            sql.append(" ON DUPLICATE KEY UPDATE ");
+            for (String key : keys) {
+                if ("ORACLE___RW".equals(key)) {
+                    continue;
+                }
+                sql.append("`").append(key).append("` = ?,");
+            }
+
+            sql.deleteCharAt(sql.length() - 1);
+            sqlStr = sql.toString();
+        } else if (dbType == DbType.ORACLE.type) {
+            sqlStr = sql.toString();
+        } else {
+            sqlStr = sql.toString();
+        }
+
+        LogUtil.debug(sqlStr);
+
+        if (dbType == DbType.MY_SQL.type) {
+            return DBUtil.addDataStepMysql(connectionDes, sqlStr, data);
+        } else if (dbType == DbType.ORACLE.type) {//不会覆盖，待完善
+            return DBUtil.addDataStepOracle(connectionDes, sqlStr, data);
+        } else {//不会覆盖，待完善
+            return DBUtil.addDataStepOracle(connectionDes, sqlStr, data);
+        }
     }
 }

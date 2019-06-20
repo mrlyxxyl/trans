@@ -545,7 +545,49 @@ public class DBUtil {
         return false;
     }
 
-    public static boolean addDataStep(Connection connection, String sql, List<Map<String, Object>> data) {
+    public static boolean addDataStepMysql(Connection connection, String sql, List<Map<String, Object>> data) {
+        PreparedStatement statement = null;
+        try {
+            connection.setAutoCommit(false);
+            statement = connection.prepareStatement(sql);
+            for (Map<String, Object> map : data) {
+                int i = 1;
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    if ("ORACLE___RW".equals(entry.getKey())) {
+                        continue;
+                    }
+                    statement.setObject(i++, entry.getValue());
+                }
+
+                for (Map.Entry<String, Object> entry : map.entrySet()) {
+                    if ("ORACLE___RW".equals(entry.getKey())) {
+                        continue;
+                    }
+                    statement.setObject(i++, entry.getValue());
+                }
+                statement.addBatch();
+            }
+
+            statement.executeBatch();
+            connection.commit();
+            connection.setAutoCommit(true);
+            statement.close();
+            return true;
+        } catch (Exception e) {
+            LogUtil.debug(e.getMessage());
+            LogUtil.error(e);
+        } finally {
+            try {
+                if (statement != null) {
+                    statement.close();
+                }
+            } catch (SQLException e) {
+            }
+        }
+        return false;
+    }
+
+    public static boolean addDataStepOracle(Connection connection, String sql, List<Map<String, Object>> data) {
         PreparedStatement statement = null;
         try {
             connection.setAutoCommit(false);
