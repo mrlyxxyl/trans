@@ -613,7 +613,6 @@ public class EtlService {
                     }
                 }
 
-                DBUtil.closeConnection(connectionDes);
                 etlDao.updateApiTransTime(entity, now);
 
                 LogUtil.debug("tableName:::" + desTableName + "\t\tuploadData-end");
