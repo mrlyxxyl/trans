@@ -8,7 +8,6 @@ import net.ys.constant.DbType;
 import net.ys.constant.X;
 import net.ys.dao.DbDao;
 import net.ys.dao.EtlDao;
-import net.ys.threadpool.ThreadPoolManager;
 import net.ys.utils.DBUtil;
 import net.ys.utils.KettleUtil;
 import net.ys.utils.LogUtil;
@@ -333,20 +332,10 @@ public class EtlService {
     }
 
     public void genTablesAndFields(final EtlDataSource etlDataSource) {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    boolean flag = genTables(etlDataSource);
-                    if (flag) {
-                        genFields(etlDataSource);
-                    }
-                } catch (Exception e) {
-                    LogUtil.error(e);
-                }
-            }
-        };
-        ThreadPoolManager.INSTANCE.complexPool.doIt(r);
+        boolean flag = genTables(etlDataSource);
+        if (flag) {
+            genFields(etlDataSource);
+        }
     }
 
     public boolean stopAllEtlJob(String prjId) {

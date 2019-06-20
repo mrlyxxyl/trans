@@ -1,7 +1,6 @@
 package net.ys.controller;
 
 import net.ys.bean.*;
-import net.ys.component.SysConfig;
 import net.ys.constant.GenResult;
 import net.ys.constant.SysRegex;
 import net.ys.service.EtlService;

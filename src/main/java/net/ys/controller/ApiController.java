@@ -79,7 +79,6 @@ public class ApiController {
             is.close();
             os.close();
         } catch (Exception e) {
-            e.printStackTrace();
             LogUtil.error(e);
         } finally {
             try {
@@ -90,7 +89,6 @@ public class ApiController {
                     is.close();
                 }
             } catch (IOException e) {
-                LogUtil.error(e);
             }
         }
     }
