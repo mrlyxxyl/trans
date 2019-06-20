@@ -403,14 +403,14 @@ public class EtlService {
      *
      * @return
      */
-    public void restartEtlJob(String kjbPath) {
+    public void restartEtlJob() {
         try {
             List<Map<String, Object>> etlEntities = queryStartedEntities();
             if (etlEntities.size() > 0) {
                 for (Map<String, Object> etlEntity : etlEntities) {
                     String entityId = String.valueOf(etlEntity.get("id"));
                     String etlId = String.valueOf(etlEntity.get("etl_id"));
-                    KettleUtil.startEtlJob(kjbPath + etlId + ".kjb", entityId);
+                    KettleUtil.startEtlJob(etlId, entityId);
                 }
             }
         } catch (Exception e) {

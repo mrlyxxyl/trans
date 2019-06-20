@@ -5,6 +5,7 @@ import net.ys.constant.DbType;
 import net.ys.dao.DbDao;
 import net.ys.dao.EtlDao;
 import net.ys.utils.DBUtil;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -12,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * User: LiWenC
+ * User: NMY
  * Date: 18-4-24
  */
 
@@ -28,6 +29,7 @@ public class DbService {
     /**
      * 扫描数据源，获取表信息
      */
+    @Scheduled(cron = "1 */20 0 * * ?")
     public void genTable() {
         //1、读表获取数据源
         List<EtlDataSource> dataSources = dbDao.queryDataSources();
@@ -86,6 +88,7 @@ public class DbService {
     /**
      * 扫描表，获取字段信息
      */
+    @Scheduled(cron = "50 */20 0 * * ?")
     public void genField() {
 
         List<EtlDataSource> dataSources = dbDao.queryDataSources();

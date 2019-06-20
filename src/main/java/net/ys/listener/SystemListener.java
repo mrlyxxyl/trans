@@ -1,9 +1,8 @@
 package net.ys.listener;
 
-import net.ys.component.SysConfig;
+import net.ys.component.ApplicationContextUtil;
 import net.ys.service.EtlService;
 import net.ys.threadpool.ThreadPoolManager;
-import net.ys.component.ApplicationContextUtil;
 
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
@@ -29,7 +28,7 @@ public class SystemListener implements ServletContextListener {
             @Override
             public void run() {
                 EtlService etlService = ApplicationContextUtil.getBean("etlService", EtlService.class);
-                etlService.restartEtlJob(SysConfig.etlKtrPath);
+                etlService.restartEtlJob();
             }
         };
         ThreadPoolManager.INSTANCE.complexPool.doIt(r);

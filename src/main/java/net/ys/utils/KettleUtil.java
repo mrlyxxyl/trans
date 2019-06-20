@@ -3,6 +3,7 @@ package net.ys.utils;
 import net.ys.bean.EtlEntity;
 import net.ys.bean.EtlField;
 import net.ys.bean.EtlProject;
+import net.ys.component.SysConfig;
 import net.ys.constant.DbType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.StringUtils;
@@ -29,7 +30,7 @@ import java.util.*;
 
 /**
  * kettle工具
- * User: LiWenC
+ * User: NMY
  * Date: 18-3-13
  */
 public class KettleUtil {
@@ -39,7 +40,7 @@ public class KettleUtil {
     /**
      * 生成ktr文件
      */
-    public static boolean genKtrFile(EtlEntity entity, EtlProject project, List<EtlField> fields, String ktrPath, String transName) {
+    public static boolean genKtrFile(EtlEntity entity, EtlProject project, List<EtlField> fields, String transName) {
         try {
             KettleEnvironment.init();
 
@@ -167,7 +168,7 @@ public class KettleUtil {
             transMeta.addTransHop(new TransHopMeta(tableInputMetaStep, insertUpdateStep));
 
             String transXml = transMeta.getXML();
-            String transFilePath = ktrPath + transName + ".ktr";//转换生成的配置文件的路径
+            String transFilePath = SysConfig.etlKtrPath + transName + ".ktr";//转换生成的配置文件的路径
             File file = new File(transFilePath);
             FileUtils.writeStringToFile(file, transXml, "UTF-8");
 
@@ -183,12 +184,10 @@ public class KettleUtil {
     /**
      * 生成kjb文件
      *
-     * @param etlId       作业名称
-     * @param ktrFilePath ktr文件路径
-     * @param kjbPath     生成kjb文件路径
+     * @param etlId 作业名称
      * @return
      */
-    public static boolean genKjbFile(String etlId, String ktrFilePath, String kjbPath, EtlEntity entity) {
+    public static boolean genKjbFile(String etlId, EtlEntity entity) {
         try {
             KettleEnvironment.init();
             JobMeta jobMeta = new JobMeta();
@@ -230,7 +229,7 @@ public class KettleUtil {
             writeToFile.setName("转换");
             writeToFile.setLogLevel(LogLevel.BASIC);
             writeToFile.setTypeId("TRANS");
-            writeToFile.setFilename(ktrFilePath);
+            writeToFile.setFilename(SysConfig.etlKtrPath + etlId + ".ktr");
 
             JobEntryCopy writeToLogEntry = new JobEntryCopy(writeToFile);
             writeToLogEntry.setDrawn(true);
@@ -239,7 +238,7 @@ public class KettleUtil {
             jobMeta.addJobHop(new JobHopMeta(startEntry, writeToLogEntry));
 
             String transXml = jobMeta.getXML();
-            File file = new File(kjbPath + etlId + ".kjb");
+            File file = new File(SysConfig.etlKjbPath + etlId + ".kjb");
             FileUtils.writeStringToFile(file, transXml, "UTF-8");
             return true;
         } catch (Exception e) {
@@ -251,17 +250,17 @@ public class KettleUtil {
     /**
      * 启动任务
      *
-     * @param jobPath
+     * @param etlId
      * @throws Exception
      */
-    public static void startEtlJob(final String jobPath, String entityId) throws KettleException {
+    public static void startEtlJob(final String etlId, String entityId) throws KettleException {
 
         //job.waitUntilFinished();
 
         Job jobTemp = jobMap.get(entityId);
         if (jobTemp == null || !jobTemp.isAlive()) {
             KettleEnvironment.init();//初始化
-            JobMeta jobMeta = new JobMeta(jobPath, null);
+            JobMeta jobMeta = new JobMeta(SysConfig.etlKjbPath + etlId + ".kjb", null);
             Job job = new Job(null, jobMeta);
             job.start();
             jobMap.put(entityId, job);

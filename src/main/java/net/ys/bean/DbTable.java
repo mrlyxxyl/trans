@@ -1,7 +1,7 @@
 package net.ys.bean;
 
 /**
- * User: LiWenC
+ * User: NMY
  * Date: 17-12-7
  */
 public class DbTable {

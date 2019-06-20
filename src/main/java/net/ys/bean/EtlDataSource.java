@@ -3,7 +3,7 @@ package net.ys.bean;
 import java.io.Serializable;
 
 /**
- * User: LiWenC
+ * User: NMY
  * Date: 17-12-7
  */
 public class EtlDataSource implements Serializable {
@@ -12,7 +12,7 @@ public class EtlDataSource implements Serializable {
 
     private String sourceName;
 
-    private int dbType; //数据库类型0-mysql/1-oracle/2-mssql
+    private int dbType; //数据库类型0-mysql/1-oracle/2-ms sql
 
     private String dbIp;
 

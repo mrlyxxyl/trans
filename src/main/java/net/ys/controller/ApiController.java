@@ -4,7 +4,6 @@ import net.sf.jxls.transformer.XLSTransformer;
 import net.ys.bean.DbField;
 import net.ys.bean.EtlDataSource;
 import net.ys.constant.GenResult;
-import net.ys.service.DbService;
 import net.ys.service.EtlService;
 import net.ys.utils.DBUtil;
 import net.ys.utils.LogUtil;
@@ -32,36 +31,7 @@ import java.util.Map;
 public class ApiController {
 
     @Resource
-    private DbService dbService;
-
-    @Resource
     private EtlService etlService;
-
-    @RequestMapping(value = "genTable")
-    @ResponseBody
-    public Map<String, Object> genTable() {
-        try {
-            long now = System.currentTimeMillis();
-            dbService.genTable();
-            return GenResult.SUCCESS.genResult(System.currentTimeMillis() - now);
-        } catch (Exception e) {
-            LogUtil.error(e);
-            return GenResult.UNKNOWN_ERROR.genResult();
-        }
-    }
-
-    @RequestMapping(value = "genField")
-    @ResponseBody
-    public Map<String, Object> genField() {
-        try {
-            long now = System.currentTimeMillis();
-            dbService.genField();
-            return GenResult.SUCCESS.genResult(System.currentTimeMillis() - now);
-        } catch (Exception e) {
-            LogUtil.error(e);
-            return GenResult.UNKNOWN_ERROR.genResult();
-        }
-    }
 
     /**
      * 上传数据

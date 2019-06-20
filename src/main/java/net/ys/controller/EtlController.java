@@ -14,10 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,18 +26,6 @@ public class EtlController {
 
     @Resource
     private EtlService etlService;
-
-    @PostConstruct
-    public void init() {
-        File file = new File(SysConfig.etlKtrPath);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        file = new File(SysConfig.etlKjbPath);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-    }
 
     @RequestMapping(value = "dataSourceList")
     public ModelAndView dataSourceList(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int pageSize) {
@@ -556,12 +542,12 @@ public class EtlController {
             EtlProject project = etlService.queryEtlKtrProject(entityId);
 
             String etlId = entity.getEtlId();
-            boolean flag = KettleUtil.genKtrFile(entity, project, fields, SysConfig.etlKtrPath, etlId);//生成ktr转换文件
+            boolean flag = KettleUtil.genKtrFile(entity, project, fields, etlId);//生成ktr转换文件
 
             if (flag) {
-                flag = KettleUtil.genKjbFile(etlId, SysConfig.etlKtrPath + etlId + ".ktr", SysConfig.etlKjbPath, entity);
+                flag = KettleUtil.genKjbFile(etlId, entity);
                 if (flag) {//执行job
-                    KettleUtil.startEtlJob(SysConfig.etlKjbPath + etlId + ".kjb", entityId);
+                    KettleUtil.startEtlJob(etlId, entityId);
                     flag = etlService.chgJobStatus(entityId, 1);
                 }
             }

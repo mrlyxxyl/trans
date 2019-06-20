@@ -1,7 +1,7 @@
 package net.ys.bean;
 
 /**
- * User: LiWenC
+ * User: NMY
  * Date: 17-12-7
  */
 public class DbField {
@@ -15,11 +15,6 @@ public class DbField {
     private String comment;//注释
 
     private int priKey;//是否为主键
-
-    public DbField(String fieldName, String comment) {
-        this.fieldName = fieldName;
-        this.comment = comment;
-    }
 
     public DbField(String tableId, String fieldName, String comment, int priKey) {
         this.tableId = tableId;

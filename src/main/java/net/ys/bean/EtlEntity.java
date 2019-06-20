@@ -3,7 +3,7 @@ package net.ys.bean;
 import java.io.Serializable;
 
 /**
- * User: LiWenC
+ * User: NMY
  * Date: 17-12-7
  */
 public class EtlEntity implements Serializable {

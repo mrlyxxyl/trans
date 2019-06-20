@@ -7,7 +7,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
 /**
- * User: LiWenC
+ * User: NMY
  * Date: 16-9-12
  */
 @Component
