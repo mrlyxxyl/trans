@@ -461,8 +461,8 @@ public class EtlService {
             for (int i = 1; i < fields.size(); i++) {
                 sqlSelect.append(", ").append(quotLeft).append(fields.get(i).getSrcFieldName()).append(quotRight);
             }
-            sqlSelect.append(" FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME BETWEEN ? AND ? ORDER BY SYS__CREATE_OR_UPDATE_TIME, ").append(quotLeft).append(entity.getSrcPrimaryKey()).append(quotRight).append(" LIMIT ?,?");
-            sqlCount = new StringBuffer("SELECT COUNT(*) AS C FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME BETWEEN ? AND ?");
+            sqlSelect.append(" FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME > ? AND SYS__CREATE_OR_UPDATE_TIME <= ? ORDER BY SYS__CREATE_OR_UPDATE_TIME, ").append(quotLeft).append(entity.getSrcPrimaryKey()).append(quotRight).append(" LIMIT ?,?");
+            sqlCount = new StringBuffer("SELECT COUNT(*) AS C FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME > ? AND SYS__CREATE_OR_UPDATE_TIME <= ?");
         } else if (dbType == DbType.ORACLE.type) {
             quotLeft = "\"";
             quotRight = "\"";
@@ -471,8 +471,8 @@ public class EtlService {
             for (int i = 1; i < fields.size(); i++) {
                 sqlSelect.append(", ").append(quotLeft).append(fields.get(i).getSrcFieldName()).append(quotRight);
             }
-            sqlSelect.append(" FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE to_char(SYS__CREATE_OR_UPDATE_TIME,'yyyy-mm-dd HH24:mi:ss') BETWEEN ? AND ? ORDER BY SYS__CREATE_OR_UPDATE_TIME, ").append(quotLeft).append(entity.getSrcPrimaryKey()).append(quotRight).append(") T1) T2 WHERE T2.ORACLE___RW >= ? AND T2.ORACLE___RW < ? ");
-            sqlCount = new StringBuffer("SELECT COUNT(*) AS C FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE to_char(SYS__CREATE_OR_UPDATE_TIME,'yyyy-mm-dd HH24:mi:ss') BETWEEN ? AND ?");
+            sqlSelect.append(" FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE to_char(SYS__CREATE_OR_UPDATE_TIME,'yyyy-mm-dd HH24:mi:ss') > ? AND to_char(SYS__CREATE_OR_UPDATE_TIME,'yyyy-mm-dd HH24:mi:ss') <= ? ORDER BY SYS__CREATE_OR_UPDATE_TIME, ").append(quotLeft).append(entity.getSrcPrimaryKey()).append(quotRight).append(") T1) T2 WHERE T2.ORACLE___RW >= ? AND T2.ORACLE___RW < ? ");
+            sqlCount = new StringBuffer("SELECT COUNT(*) AS C FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE to_char(SYS__CREATE_OR_UPDATE_TIME,'yyyy-mm-dd HH24:mi:ss') > ? AND to_char(SYS__CREATE_OR_UPDATE_TIME,'yyyy-mm-dd HH24:mi:ss') <= ?");
         } else {
             quotLeft = "[";
             quotRight = "]";
@@ -481,8 +481,8 @@ public class EtlService {
             for (int i = 1; i < fields.size(); i++) {
                 sqlSelect.append(", ").append(quotLeft).append(fields.get(i).getSrcFieldName()).append(quotRight).append(" ");
             }
-            sqlSelect.append(" FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME BETWEEN ? AND ? ORDER BY SYS__CREATE_OR_UPDATE_TIME, ").append(quotLeft).append(entity.getSrcPrimaryKey()).append(quotRight).append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
-            sqlCount = new StringBuffer("SELECT COUNT(*) AS C FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME BETWEEN ? AND ?");
+            sqlSelect.append(" FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME > ? AND SYS__CREATE_OR_UPDATE_TIME <= ? ORDER BY SYS__CREATE_OR_UPDATE_TIME, ").append(quotLeft).append(entity.getSrcPrimaryKey()).append(quotRight).append(" OFFSET ? ROWS FETCH NEXT ? ROWS ONLY");
+            sqlCount = new StringBuffer("SELECT COUNT(*) AS C FROM ").append(quotLeft).append(entity.getSrcTabName()).append(quotRight).append(" WHERE SYS__CREATE_OR_UPDATE_TIME > ? AND SYS__CREATE_OR_UPDATE_TIME <= ?");
         }
 
         sql.put("sqlSelect", sqlSelect.toString());
